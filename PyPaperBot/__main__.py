@@ -14,16 +14,6 @@ from proxy import proxy
 from __init__ import __version__
 from urllib.parse import urljoin
 
-def checkVersion():
-    try :
-        print("PyPaperBot v" + __version__)
-        response = requests.get('https://pypi.org/pypi/pypaperbot/json')
-        latest_version = response.json()['info']['version']
-        if latest_version != __version__:
-            print("NEW VERSION AVAILABLE!\nUpdate with 'pip install PyPaperBot —upgrade' to get the latest features!\n")
-    except :
-        pass
-
 
 def start(query, scholar_results, scholar_pages, dwn_dir, proxy, min_date=None, num_limit=None, num_limit_type=None,
           filter_jurnal_file=None, restrict=None, DOIs=None, SciHub_URL=None, chrome_version=None, cites=None,
@@ -87,7 +77,7 @@ def main():
                         help='If given in %%d format, the number of pages to download from the beginning. '
                              'If given in %%d-%%d format, the range of pages (starting from 1) to download (the end is included). '
                              'Each page has a maximum of 10 papers (required for --query)')
-    parser.add_argument('--dwn-dir', type=str, help='Directory path in which to save the results')
+    parser.add_argument('--dwn-dir', default="output", type=str, help='Directory path in which to save the results')
     parser.add_argument('--min-year', default=None, type=int, help='Minimal publication year of the paper to download')
     parser.add_argument('--max-dwn-year', default=None, type=int,
                         help='Maximum number of papers to download sorted by year')
@@ -109,7 +99,7 @@ def main():
                         help='Use a single proxy. Recommended if using --proxy gives errors')
     parser.add_argument('--selenium-chrome-version', type=int, default=None,
                         help='First three digits of the chrome version installed on your machine. If provided, selenium will be used for scholar search. It helps avoid bot detection but chrome must be installed.')
-    parser.add_argument('--use-doi-as-filename', action='store_true', default=False,
+    parser.add_argument('--use-doi-as-filename', action='store_true', default=True,
                         help='Use DOIs as output file names')
     args = parser.parse_args()
 
@@ -200,9 +190,4 @@ def main():
           args.use_doi_as_filename, args.annas_archive_mirror, args.skip_words)
 
 if __name__ == "__main__":
-    checkVersion()
     main()
-    print(
-        """\nWork completed!
-        -Join the telegram channel to stay updated --> https://t.me/pypaperbotdatawizards <--
-        -If you like this project, you can share a cup of coffee at --> https://www.paypal.com/paypalme/ferru97 <-- :)\n""")
