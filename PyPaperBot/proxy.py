@@ -1,6 +1,7 @@
 import socket
 import pyChainedProxy as socks
 
+
 def proxy(pchain):
 
     chain = pchain

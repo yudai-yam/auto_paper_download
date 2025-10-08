@@ -19,7 +19,9 @@ Input
 Output
     result: list of Paper published by the journals included in the csv
 """
-def filterJurnals(papers,csv_path):
+
+
+def filterJurnals(papers, csv_path):
     result = []
     df = pd.read_csv(csv_path, sep=";")
     journal_list = list(df["journal_list"])
@@ -45,7 +47,9 @@ Input
 Output
     result: list of Paper published since min_year
 """
-def filter_min_date(list_papers,min_year):
+
+
+def filter_min_date(list_papers, min_year):
     new_list = []
 
     for paper in list_papers:

@@ -16,9 +16,26 @@ from urllib.parse import urljoin
 from config import input_dir
 import pandas as pd
 
-def start(query, scholar_results, scholar_pages, dwn_dir, proxy, min_date=None, num_limit=None, num_limit_type=None,
-          filter_jurnal_file=None, restrict=None, DOIs=None, SciHub_URL=None, chrome_version=None, cites=None,
-          use_doi_as_filename=False, SciDB_URL=None, skip_words=None):
+
+def start(
+    query,
+    scholar_results,
+    scholar_pages,
+    dwn_dir,
+    proxy,
+    min_date=None,
+    num_limit=None,
+    num_limit_type=None,
+    filter_jurnal_file=None,
+    restrict=None,
+    DOIs=None,
+    SciHub_URL=None,
+    chrome_version=None,
+    cites=None,
+    use_doi_as_filename=False,
+    SciDB_URL=None,
+    skip_words=None,
+):
 
     if SciDB_URL is not None and "/scidb" not in SciDB_URL:
         SciDB_URL = urljoin(SciDB_URL, "/scidb/")
@@ -27,7 +44,16 @@ def start(query, scholar_results, scholar_pages, dwn_dir, proxy, min_date=None, 
     if DOIs is None:
         print("Query: {}".format(query))
         print("Cites: {}".format(cites))
-        to_download = ScholarPapersInfo(query, scholar_pages, restrict, min_date, scholar_results, chrome_version, cites, skip_words)
+        to_download = ScholarPapersInfo(
+            query,
+            scholar_pages,
+            restrict,
+            min_date,
+            scholar_results,
+            chrome_version,
+            cites,
+            skip_words,
+        )
     else:
         print("Downloading papers from DOIs\n")
         num = 1
@@ -50,65 +76,150 @@ def start(query, scholar_results, scholar_pages, dwn_dir, proxy, min_date=None, 
             to_download = filter_min_date(to_download, min_date)
 
         if num_limit_type is not None and num_limit_type == 0:
-            to_download.sort(key=lambda x: int(x.year) if x.year is not None else 0, reverse=True)
+            to_download.sort(
+                key=lambda x: int(x.year) if x.year is not None else 0, reverse=True
+            )
 
         if num_limit_type is not None and num_limit_type == 1:
-            to_download.sort(key=lambda x: int(x.cites_num) if x.cites_num is not None else 0, reverse=True)
+            to_download.sort(
+                key=lambda x: int(x.cites_num) if x.cites_num is not None else 0,
+                reverse=True,
+            )
 
         downloadPapers(to_download, dwn_dir, num_limit, SciHub_URL, SciDB_URL)
 
-    Paper.generateReport(to_download, dwn_dir + "result.csv")
-    Paper.generateBibtex(to_download, dwn_dir + "bibtex.bib")
+    Paper.generateReport(to_download, dwn_dir + "/result.csv")
+    Paper.generateBibtex(to_download, dwn_dir + "/bibtex.bib")
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='PyPaperBot is python tool to search and dwonload scientific papers using Google Scholar, Crossref and SciHub')
-    parser.add_argument('--query', type=str, default=None,
-                        help='Query to make on Google Scholar or Google Scholar page link')
-    parser.add_argument('--skip-words', type=str, default=None,
-                        help='List of comma separated works. Papers from Scholar containing this words on title or summary will be skipped')
-    parser.add_argument('--cites', type=str, default=None,
-                        help='Paper ID (from scholar address bar when you search citations) if you want get only citations of that paper')
-    parser.add_argument('--doi', type=str, default=None,
-                        help='DOI of the paper to download (this option uses only SciHub to download)')
-    parser.add_argument('--doi-file', type=str, default=None,
-                        help='CSV file containing the list of paper\'s DOIs to download')
-    parser.add_argument('--scholar-pages', type=str,
-                        help='If given in %%d format, the number of pages to download from the beginning. '
-                             'If given in %%d-%%d format, the range of pages (starting from 1) to download (the end is included). '
-                             'Each page has a maximum of 10 papers (required for --query)')
-    parser.add_argument('--dwn-dir', default="output", type=str, help='Directory path in which to save the results')
-    parser.add_argument('--min-year', default=None, type=int, help='Minimal publication year of the paper to download')
-    parser.add_argument('--max-dwn-year', default=None, type=int,
-                        help='Maximum number of papers to download sorted by year')
-    parser.add_argument('--max-dwn-cites', default=None, type=int,
-                        help='Maximum number of papers to download sorted by number of citations')
-    parser.add_argument('--journal-filter', default=None, type=str,
-                        help='CSV file path of the journal filter (More info on github)')
-    parser.add_argument('--restrict', default=None, type=int, choices=[0, 1],
-                        help='0:Download only Bibtex - 1:Down load only papers PDF')
-    parser.add_argument('--scihub-mirror', default=None, type=str,
-                        help='Mirror for downloading papers from sci-hub. If not set, it is selected automatically')
-    parser.add_argument('--annas-archive-mirror', default=None, type=str,
-                        help='Mirror for downloading papers from Annas Archive (SciDB). If not set, https://annas-archive.se is used')
-    parser.add_argument('--scholar-results', default=10, type=int, choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                        help='Downloads the first x results for each scholar page(default/max=10)')
-    parser.add_argument('--proxy', nargs='+', default=[],
-                        help='Use proxychains, provide a seperated list of proxies to use.Please specify the argument al the end')
-    parser.add_argument('--single-proxy', type=str, default=None,
-                        help='Use a single proxy. Recommended if using --proxy gives errors')
-    parser.add_argument('--selenium-chrome-version', type=int, default=None,
-                        help='First three digits of the chrome version installed on your machine. If provided, selenium will be used for scholar search. It helps avoid bot detection but chrome must be installed.')
-    parser.add_argument('--use-doi-as-filename', action='store_true', default=True,
-                        help='Use DOIs as output file names')
+        description="PyPaperBot is python tool to search and dwonload scientific papers using Google Scholar, Crossref and SciHub"
+    )
+    parser.add_argument(
+        "--query",
+        type=str,
+        default=None,
+        help="Query to make on Google Scholar or Google Scholar page link",
+    )
+    parser.add_argument(
+        "--skip-words",
+        type=str,
+        default=None,
+        help="List of comma separated works. Papers from Scholar containing this words on title or summary will be skipped",
+    )
+    parser.add_argument(
+        "--cites",
+        type=str,
+        default=None,
+        help="Paper ID (from scholar address bar when you search citations) if you want get only citations of that paper",
+    )
+    parser.add_argument(
+        "--doi",
+        type=str,
+        default=None,
+        help="DOI of the paper to download (this option uses only SciHub to download)",
+    )
+    parser.add_argument(
+        "--doi-file",
+        type=str,
+        default=None,
+        help="CSV file containing the list of paper's DOIs to download",
+    )
+    parser.add_argument(
+        "--scholar-pages",
+        type=str,
+        help="If given in %%d format, the number of pages to download from the beginning. "
+        "If given in %%d-%%d format, the range of pages (starting from 1) to download (the end is included). "
+        "Each page has a maximum of 10 papers (required for --query)",
+    )
+    parser.add_argument(
+        "--dwn-dir",
+        default="output",
+        type=str,
+        help="Directory path in which to save the results",
+    )
+    parser.add_argument(
+        "--min-year",
+        default=None,
+        type=int,
+        help="Minimal publication year of the paper to download",
+    )
+    parser.add_argument(
+        "--max-dwn-year",
+        default=None,
+        type=int,
+        help="Maximum number of papers to download sorted by year",
+    )
+    parser.add_argument(
+        "--max-dwn-cites",
+        default=None,
+        type=int,
+        help="Maximum number of papers to download sorted by number of citations",
+    )
+    parser.add_argument(
+        "--journal-filter",
+        default=None,
+        type=str,
+        help="CSV file path of the journal filter (More info on github)",
+    )
+    parser.add_argument(
+        "--restrict",
+        default=None,
+        type=int,
+        choices=[0, 1],
+        help="0:Download only Bibtex - 1:Down load only papers PDF",
+    )
+    parser.add_argument(
+        "--scihub-mirror",
+        default=None,
+        type=str,
+        help="Mirror for downloading papers from sci-hub. If not set, it is selected automatically",
+    )
+    parser.add_argument(
+        "--annas-archive-mirror",
+        default=None,
+        type=str,
+        help="Mirror for downloading papers from Annas Archive (SciDB). If not set, https://annas-archive.se is used",
+    )
+    parser.add_argument(
+        "--scholar-results",
+        default=10,
+        type=int,
+        choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        help="Downloads the first x results for each scholar page(default/max=10)",
+    )
+    parser.add_argument(
+        "--proxy",
+        nargs="+",
+        default=[],
+        help="Use proxychains, provide a seperated list of proxies to use.Please specify the argument al the end",
+    )
+    parser.add_argument(
+        "--single-proxy",
+        type=str,
+        default=None,
+        help="Use a single proxy. Recommended if using --proxy gives errors",
+    )
+    parser.add_argument(
+        "--selenium-chrome-version",
+        type=int,
+        default=None,
+        help="First three digits of the chrome version installed on your machine. If provided, selenium will be used for scholar search. It helps avoid bot detection but chrome must be installed.",
+    )
+    parser.add_argument(
+        "--use-doi-as-filename",
+        action="store_true",
+        default=True,
+        help="Use DOIs as output file names",
+    )
     args = parser.parse_args()
 
     if args.single_proxy is not None:
-        os.environ['http_proxy'] = args.single_proxy
-        os.environ['HTTP_PROXY'] = args.single_proxy
-        os.environ['https_proxy'] = args.single_proxy
-        os.environ['HTTPS_PROXY'] = args.single_proxy
+        os.environ["http_proxy"] = args.single_proxy
+        os.environ["HTTP_PROXY"] = args.single_proxy
+        os.environ["https_proxy"] = args.single_proxy
+        os.environ["HTTPS_PROXY"] = args.single_proxy
         print("Using proxy: ", args.single_proxy)
     else:
         pchain = []
@@ -164,11 +275,11 @@ def main():
 
     DOIs = []
     # read input files
-    pathlist = input_dir.glob('**/*.csv')
+    pathlist = input_dir.glob("**/*.csv")
     for file in pathlist:
-        df = pd.read_csv(file)
+        df = pd.read_csv(file, header=None)
         print(f"Processing file: {file}")
-        DOIs.extend(df.iloc[:,0].tolist())
+        DOIs.extend(df.iloc[:, 0].tolist())
 
     if args.doi is not None:
         DOIs = [args.doi]
@@ -182,10 +293,26 @@ def main():
         max_dwn = args.max_dwn_cites
         max_dwn_type = 1
 
+    start(
+        args.query,
+        args.scholar_results,
+        args.scholar_pages,
+        args.dwn_dir,
+        proxy,
+        args.min_year,
+        max_dwn,
+        max_dwn_type,
+        args.journal_filter,
+        args.restrict,
+        DOIs,
+        args.scihub_mirror,
+        args.selenium_chrome_version,
+        args.cites,
+        args.use_doi_as_filename,
+        args.annas_archive_mirror,
+        args.skip_words,
+    )
 
-    start(args.query, args.scholar_results, args.scholar_pages, args.dwn_dir, proxy, args.min_year , max_dwn, max_dwn_type ,
-          args.journal_filter, args.restrict, DOIs, args.scihub_mirror, args.selenium_chrome_version, args.cites,
-          args.use_doi_as_filename, args.annas_archive_mirror, args.skip_words)
 
 if __name__ == "__main__":
     main()

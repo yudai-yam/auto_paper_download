@@ -33,13 +33,15 @@ def schoolarParser(html):
                     link_pdf = a.get("href")
             for div in element.findAll("div", class_="gs_a"):
                 try:
-                    authors, source_and_year, source = div.text.replace('\u00A0', ' ').split(" - ")
+                    authors, source_and_year, source = div.text.replace(
+                        "\u00A0", " "
+                    ).split(" - ")
                 except ValueError:
                     continue
 
-                if not authors.strip().endswith('\u2026'):
+                if not authors.strip().endswith("\u2026"):
                     # There is no ellipsis at the end so we know the full list of authors
-                    authors = authors.replace(', ', ';')
+                    authors = authors.replace(", ", ";")
                 else:
                     authors = None
                 try:
@@ -51,13 +53,16 @@ def schoolarParser(html):
                 else:
                     year = str(year)
             if title is not None:
-                result.append({
-                    'title': title,
-                    'link': link,
-                    'cites': cites,
-                    'link_pdf': link_pdf,
-                    'year': year,
-                    'authors': authors})
+                result.append(
+                    {
+                        "title": title,
+                        "link": link,
+                        "cites": cites,
+                        "link_pdf": link_pdf,
+                        "year": year,
+                        "authors": authors,
+                    }
+                )
     return result
 
 
@@ -73,10 +78,12 @@ def getSchiHubPDF(html):
     result = None
     soup = BeautifulSoup(html, "html.parser")
 
-    iframe = soup.find(id='pdf') #scihub logic
-    plugin = soup.find(id='plugin') #scihub logic
-    download_scidb = soup.find("a", text=lambda text: text and "Download" in text, href=re.compile(r"\.pdf$")) #scidb logic
-    embed_scihub = soup.find("embed") #scihub logic
+    iframe = soup.find(id="pdf")  # scihub logic
+    plugin = soup.find(id="plugin")  # scihub logic
+    download_scidb = soup.find(
+        "a", text=lambda text: text and "Download" in text, href=re.compile(r"\.pdf$")
+    )  # scidb logic
+    embed_scihub = soup.find("embed")  # scihub logic
 
     if iframe is not None:
         result = iframe.get("src")
@@ -103,7 +110,9 @@ def SciHubUrls(html):
     for ul in soup.findAll("ul"):
         for a in ul.findAll("a"):
             link = a.get("href")
-            if link.startswith("https://sci-hub.") or link.startswith("http://sci-hub."):
+            if link.startswith("https://sci-hub.") or link.startswith(
+                "http://sci-hub."
+            ):
                 result.append(link)
 
     return result

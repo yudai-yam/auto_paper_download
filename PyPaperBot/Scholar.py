@@ -10,8 +10,10 @@ from NetInfo import NetInfo
 
 def waithIPchange():
     while True:
-        inp = input('You have been blocked, try changing your IP or using a VPN. '
-                    'Press Enter to continue downloading, or type "exit" to stop and exit....')
+        inp = input(
+            "You have been blocked, try changing your IP or using a VPN. "
+            'Press Enter to continue downloading, or type "exit" to stop and exit....'
+        )
         if inp.strip().lower() == "exit":
             return False
         elif not inp.strip():
@@ -21,7 +23,9 @@ def waithIPchange():
 
 
 def scholar_requests(scholar_pages, url, restrict, chrome_version, scholar_results=10):
-    javascript_error = "Sorry, we can't verify that you're not a robot when JavaScript is turned off"
+    javascript_error = (
+        "Sorry, we can't verify that you're not a robot when JavaScript is turned off"
+    )
     to_download = []
     driver = None
     for i in scholar_pages:
@@ -31,8 +35,10 @@ def scholar_requests(scholar_pages, url, restrict, chrome_version, scholar_resul
                 if driver is None:
                     print("Using Selenium driver")
                     options = Options()
-                    options.add_argument('--headless')
-                    driver = uc.Chrome(headless=True, use_subprocess=False, version_main=chrome_version)
+                    options.add_argument("--headless")
+                    driver = uc.Chrome(
+                        headless=True, use_subprocess=False, version_main=chrome_version
+                    )
                 driver.get(res_url)
                 html = driver.page_source
             else:
@@ -54,7 +60,9 @@ def scholar_requests(scholar_pages, url, restrict, chrome_version, scholar_resul
 
         if len(papers) > 0:
             papersInfo = getPapersInfo(papers, url, restrict, scholar_results)
-            info_valids = functools.reduce(lambda a, b: a + 1 if b.DOI is not None else a, papersInfo, 0)
+            info_valids = functools.reduce(
+                lambda a, b: a + 1 if b.DOI is not None else a, papersInfo, 0
+            )
             print("Papers found on Crossref: {}/{}\n".format(info_valids, len(papers)))
 
             to_download.append(papersInfo)
@@ -73,14 +81,25 @@ def parseSkipList(skip_words):
         if " " in skip_word:
             output_param += '+-"' + skip_word + '"'
         else:
-            output_param += '+-' + skip_word
+            output_param += "+-" + skip_word
     return output_param
 
 
-def ScholarPapersInfo(query, scholar_pages, restrict, min_date=None, scholar_results=10, chrome_version=None, cites=None, skip_words=None):
+def ScholarPapersInfo(
+    query,
+    scholar_pages,
+    restrict,
+    min_date=None,
+    scholar_results=10,
+    chrome_version=None,
+    cites=None,
+    skip_words=None,
+):
     url = r"https://scholar.google.com/scholar?hl=en&as_vis=1&as_sdt=1,5&start=%d"
     if query:
-        if len(query) > 7 and (query.startswith("http://") or query.startswith("https://")):
+        if len(query) > 7 and (
+            query.startswith("http://") or query.startswith("https://")
+        ):
             url = query
         else:
             url += f"&q={query}"
@@ -92,6 +111,8 @@ def ScholarPapersInfo(query, scholar_pages, restrict, min_date=None, scholar_res
     if min_date:
         url += f"&as_ylo={min_date}"
 
-    to_download = scholar_requests(scholar_pages, url, restrict, chrome_version, scholar_results)
+    to_download = scholar_requests(
+        scholar_pages, url, restrict, chrome_version, scholar_results
+    )
 
     return [item for sublist in to_download for item in sublist]
