@@ -13,7 +13,8 @@ from Crossref import getPapersInfoFromDOIs
 from proxy import proxy
 from __init__ import __version__
 from urllib.parse import urljoin
-
+from config import input_dir
+import pandas as pd
 
 def start(query, scholar_results, scholar_pages, dwn_dir, proxy, min_date=None, num_limit=None, num_limit_type=None,
           filter_jurnal_file=None, restrict=None, DOIs=None, SciHub_URL=None, chrome_version=None, cites=None,
@@ -72,7 +73,7 @@ def main():
     parser.add_argument('--doi', type=str, default=None,
                         help='DOI of the paper to download (this option uses only SciHub to download)')
     parser.add_argument('--doi-file', type=str, default=None,
-                        help='File .txt containing the list of paper\'s DOIs to download')
+                        help='CSV file containing the list of paper\'s DOIs to download')
     parser.add_argument('--scholar-pages', type=str,
                         help='If given in %%d format, the number of pages to download from the beginning. '
                              'If given in %%d-%%d format, the range of pages (starting from 1) to download (the end is included). '
@@ -114,63 +115,60 @@ def main():
         pchain = args.proxy
         proxy(pchain)
 
-    if args.query is None and args.doi_file is None and args.doi is None and args.cites is None:
-        print("Error, provide at least one of the following arguments: --query, --file, or --cites")
-        sys.exit()
+    # if args.query is None and args.doi_file is None and args.doi is None and args.cites is None:
+    #     print("Error, provide at least one of the following arguments: --query, --file, or --cites")
+    #     sys.exit()
 
-    if (args.query is not None and args.doi_file is not None) or (args.query is not None and args.doi is not None) or (
-            args.doi is not None and args.doi_file is not None):
-        print("Error: Only one option between '--query', '--doi-file' and '--doi' can be used")
-        sys.exit()
+    # if (args.query is not None and args.doi_file is not None) or (args.query is not None and args.doi is not None) or (
+    #         args.doi is not None and args.doi_file is not None):
+    #     print("Error: Only one option between '--query', '--doi-file' and '--doi' can be used")
+    #     sys.exit()
 
-    if args.dwn_dir is None:
-        print("Error, provide the directory path in which to save the results")
-        sys.exit()
+    # if args.dwn_dir is None:
+    #     print("Error, provide the directory path in which to save the results")
+    #     sys.exit()
 
-    if args.scholar_results != 10 and args.scholar_pages != 1:
-        print("Scholar results best applied along with --scholar-pages=1")
+    # if args.scholar_results != 10 and args.scholar_pages != 1:
+    #     print("Scholar results best applied along with --scholar-pages=1")
 
-    dwn_dir = args.dwn_dir.replace('\\', '/')
-    if dwn_dir[-1] != '/':
-        dwn_dir += "/"
-    if not os.path.exists(dwn_dir):
-        os.makedirs(dwn_dir, exist_ok=True)
+    # dwn_dir = args.dwn_dir.replace('\\', '/')
+    # if dwn_dir[-1] != '/':
+    #     dwn_dir += "/"
+    # if not os.path.exists(dwn_dir):
+    #     os.makedirs(dwn_dir, exist_ok=True)
 
-    if args.max_dwn_year is not None and args.max_dwn_cites is not None:
-        print("Error: Only one option between '--max-dwn-year' and '--max-dwn-cites' can be used ")
-        sys.exit()
+    # if args.max_dwn_year is not None and args.max_dwn_cites is not None:
+    #     print("Error: Only one option between '--max-dwn-year' and '--max-dwn-cites' can be used ")
+    #     sys.exit()
 
-    if args.query is not None or args.cites is not None:
-        if args.scholar_pages:
-            try:
-                split = args.scholar_pages.split('-')
-                if len(split) == 1:
-                    scholar_pages = range(1, int(split[0]) + 1)
-                elif len(split) == 2:
-                    start_page, end_page = [int(x) for x in split]
-                    scholar_pages = range(start_page, end_page + 1)
-                else:
-                    raise ValueError
-            except Exception:
-                print(
-                    r"Error: Invalid format for --scholar-pages option. Expected: %d or %d-%d, got: " + args.scholar_pages)
-                sys.exit()
-        else:
-            print("Error: with --query provide also --scholar-pages")
-            sys.exit()
-    else:
-        scholar_pages = 0
+    # if args.query is not None or args.cites is not None:
+    #     if args.scholar_pages:
+    #         try:
+    #             split = args.scholar_pages.split('-')
+    #             if len(split) == 1:
+    #                 scholar_pages = range(1, int(split[0]) + 1)
+    #             elif len(split) == 2:
+    #                 start_page, end_page = [int(x) for x in split]
+    #                 scholar_pages = range(start_page, end_page + 1)
+    #             else:
+    #                 raise ValueError
+    #         except Exception:
+    #             print(
+    #                 r"Error: Invalid format for --scholar-pages option. Expected: %d or %d-%d, got: " + args.scholar_pages)
+    #             sys.exit()
+    #     else:
+    #         print("Error: with --query provide also --scholar-pages")
+    #         sys.exit()
+    # else:
+    #     scholar_pages = 0
 
-    DOIs = None
-    if args.doi_file is not None:
-        DOIs = []
-        f = args.doi_file.replace('\\', '/')
-        with open(f) as file_in:
-            for line in file_in:
-                if line[-1] == '\n':
-                    DOIs.append(line[:-1])
-                else:
-                    DOIs.append(line)
+    DOIs = []
+    # read input files
+    pathlist = input_dir.glob('**/*.csv')
+    for file in pathlist:
+        df = pd.read_csv(file)
+        print(f"Processing file: {file}")
+        DOIs.extend(df.iloc[:,0].tolist())
 
     if args.doi is not None:
         DOIs = [args.doi]
@@ -185,7 +183,7 @@ def main():
         max_dwn_type = 1
 
 
-    start(args.query, args.scholar_results, scholar_pages, dwn_dir, proxy, args.min_year , max_dwn, max_dwn_type ,
+    start(args.query, args.scholar_results, args.scholar_pages, args.dwn_dir, proxy, args.min_year , max_dwn, max_dwn_type ,
           args.journal_filter, args.restrict, DOIs, args.scihub_mirror, args.selenium_chrome_version, args.cites,
           args.use_doi_as_filename, args.annas_archive_mirror, args.skip_words)
 

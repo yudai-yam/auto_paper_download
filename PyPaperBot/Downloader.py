@@ -38,6 +38,7 @@ def getSaveDir(folder, fname):
 
 
 def saveFile(file_name, content, paper, dwn_source):
+    file_name = file_name.replace("%2F", "_")
     f = open(file_name, 'wb')
     f.write(content)
     f.close()
