@@ -133,4 +133,6 @@ dmypy.json
 .vscode
 
 input/*
+!input/.gitkeep
 output/*
+!output/.gitkeep

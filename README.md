@@ -9,9 +9,19 @@ It is also able to download the **bibtex** of each paper.
 Current working directory must be set to auto_paper_download/
 
 Create and activate virtual environment:
+
+### Linux
+
 ```bash
 python3 -m venv ./venv
 source venv/bin/activate
+```
+
+### Windows
+
+```bash
+python3 -m venv ./venv
+venv/Scripts/activate
 ```
 
 **Make sure the venv is activated!**
